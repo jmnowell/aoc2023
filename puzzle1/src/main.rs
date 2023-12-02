@@ -1,4 +1,14 @@
-fn extract_number(line: &String) -> u32 {
+use std::fs::read_to_string;
+
+fn read_lines(filename: &str) -> Vec<String> {
+    read_to_string(filename)
+        .unwrap()
+        .lines()
+        .map(String::from)
+        .collect()
+}
+
+fn extract_number(line: &str) -> u32 {
     let mut first = 'z';
     let mut second = 'z';
 
@@ -13,6 +23,7 @@ fn extract_number(line: &String) -> u32 {
     }
 
     let mut numbers = String::new();
+
     numbers.push(first);
 
     if second == 'z' {
@@ -25,21 +36,31 @@ fn extract_number(line: &String) -> u32 {
 }
 
 fn main() {
-    // do a little test!
-    let mut input: Vec<String> = Vec::new();
-
-    input.push(String::from("1abc2"));
-    input.push(String::from("pqr3stu8vwx"));
-    input.push(String::from("a1b2c3d4e5f"));
-    input.push(String::from("treb7uchet"));
-
     let mut sum: u32 = 0;
+    let test_input = read_lines("input.txt");
 
-    for line in input {
-        let val = extract_number(&line);
-        println!("DEBUG: extract_number {}", val);
+    for line in test_input {
         sum = sum + extract_number(&line);
     }
 
     println!("Result: {}", sum);
+}
+
+#[cfg(test)]
+#[test]
+fn given_case() {
+    let test_input = Vec::from([
+        "1abc2",
+        "pqr3stu8vwx",
+        "a1b2c3d4e5f",
+        "treb7uchet"
+    ]);
+
+    let mut sum: u32 = 0;
+
+    for line in test_input {
+        sum = sum + extract_number(&line);
+    }
+
+    assert_eq!(sum, 142);
 }
