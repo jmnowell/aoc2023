@@ -15,17 +15,17 @@ impl GameInfo {
 
         match game_re.captures(data) {
             Some(val) => {
-                for temp in val.iter() {
-                    game_id = temp.unwrap()
-                                  .as_str()
-                                  .trim()
-                                  .strip_suffix(':')
-                                  .unwrap_or_else(|| temp.unwrap().as_str().trim())
-                                  .parse::<i64>()
-                                  .unwrap_or(-1);
-                }
-            },
-
+                game_id = val.iter().next()
+                             .unwrap()
+                             .as_ref()
+                             .unwrap()
+                             .as_str()
+                             .trim()
+                             .strip_suffix(':')
+                             .unwrap_or_else(|| val.iter().next().unwrap().as_ref().unwrap().as_str().trim())
+                             .parse::<i64>()
+                             .unwrap_or(-1);
+                },
             None => (),
         }
 
