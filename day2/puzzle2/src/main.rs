@@ -12,18 +12,18 @@ fn read_lines(filename: &str) -> Vec<String> {
         .collect()
 }
 
-fn find_games(games: &Vec<GameInfo>, max_red: u16, max_green: u16, max_blue: u16) -> usize {
-    games.iter()
-         .filter(|info| {
-            let red_ok = info.red.iter().filter(|&&val| val <= max_red).count();
-            let blue_ok = info.blue.iter().filter(|&&val| val <= max_blue).count();
-            let green_ok = info.green.iter().filter(|&&val| val <= max_green).count();
+fn calc_power(game: &GameInfo) -> usize {
+    let mut sorted_red = game.red.clone();
+    let mut sorted_blue = game.blue.clone();
+    let mut sorted_green = game.green.clone();
 
-            red_ok == info.red.len() &&
-            blue_ok == info.blue.len() &&
-            green_ok == info.green.len()
-         })
-         .fold(0, |acc, info| acc + info.id)
+    sorted_red.sort();
+    sorted_blue.sort();
+    sorted_green.sort();
+
+    *sorted_red.last().unwrap() as usize * 
+    *sorted_blue.last().unwrap() as usize * 
+    *sorted_green.last().unwrap() as usize
 }
 
 fn main() {
@@ -41,7 +41,12 @@ fn main() {
         }
     }
 
-    println!("Result: {}", find_games(&games, 12, 13, 14));
+    let mut sum: usize = 0;
+    for game in games {
+        sum = sum + calc_power(&game);
+    }
+
+    println!("Result: {}", sum);
 }
 
 
@@ -68,5 +73,11 @@ fn given_case() {
     }
 
     assert_eq!(test_result.len(), 5);
-    assert_eq!(find_games(&test_result, 12, 13, 14), 8);
+    
+    let mut sum: usize = 0;
+    for game in test_result {
+        sum = sum + calc_power(&game);
+    }
+
+    assert_eq!(sum, 2286);
 }
