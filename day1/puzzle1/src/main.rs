@@ -36,17 +36,12 @@ fn extract_number(line: &str) -> u32 {
     let digits = line
         .chars()
         .into_iter()
-        .filter(|c| c.is_digit(10))
+        .flat_map(|c| c.to_digit(10))
         .collect::<Vec<_>>();
 
     // only take the first and the last
-    // NOTE: this will panic if the line doesn't contain any digits
-    let _numbers = format!("{}{}", digits[0], digits[digits.len() - 1]);
-
-    // here's an approach that won't panic
-    let mut digits_iter = digits.into_iter();
-    let first = digits_iter.next().unwrap_or('0');
-    let last = digits_iter.last().unwrap_or(first);
+    let first = digits.first().unwrap_or(&0);
+    let last = digits.last().unwrap_or(first);
 
     let numbers = format!("{first}{last}");
 
