@@ -40,6 +40,8 @@ impl Map {
             let coords = AdjCoords::from_gear(&gear, self.width, self.height);
             let mut ratios: Vec<usize> = Vec::new();
 
+            println!("DEBUG: symbol (x, y): {}, {} (x_b, x_f, y_b, y_f): {}, {}, {}, {}", gear.x, gear.y, coords.x_behind, coords.x_forward, coords.y_behind, coords.y_forward);
+
             // search for the following in this order:
             //  1) current row (x_coord) and y_beh, y_forward
             //  2) backward row (if != -1)
@@ -62,11 +64,10 @@ impl Map {
                 for part in self.parts.get(&coords.x_behind).unwrap().iter() {
                     let part_coords = AdjCoords::from_part(part, self.width, self.height);
 
+                    println!("DEBUG: part no: {}, (x, y): {}, {}, (x_b, x_f, y_b, y_f): {}, {}, {}, {}", part.number, part.x, part.y, part_coords.x_behind, part_coords.x_forward, part_coords.y_behind, part_coords.y_forward);
+                    
                     if coords.y_behind >= part_coords.y_behind  && gear.y <= part_coords.y_forward {
-                        if ratios.len() < 2 {
-                            ratios.push(part.number);
-                        }
-                        
+                        ratios.push(part.number);
                     }
                 }   
             }
@@ -75,17 +76,15 @@ impl Map {
                 for part in self.parts.get(&coords.x_forward).unwrap().iter() {
                     let part_coords = AdjCoords::from_part(part, self.width, self.height);
 
+                    println!("DEBUG: part no: {}, (x, y): {}, {}, (x_b, x_f, y_b, y_f): {}, {}, {}, {}", part.number, part.x, part.y, part_coords.x_behind, part_coords.x_forward, part_coords.y_behind, part_coords.y_forward);
+
                     if coords.y_behind >= part_coords.y_behind && gear.y <= part_coords.y_forward {
-                        if ratios.len() < 2 {
-                            ratios.push(part.number);
-                        }
+                        ratios.push(part.number);
                     }
                 }   
             }
 
-            // multiply everything in the vec, add the result to 
-            // collected nums, then clear
-            println!("DEBUG: rations: {:?}", ratios);
+            
             if ratios.len() > 2 {
                 collected_nums.push(ratios.iter().fold(1, |acc, num| { acc * num}));
             }
