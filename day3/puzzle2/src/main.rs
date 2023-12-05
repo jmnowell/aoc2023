@@ -31,13 +31,22 @@ fn parse_file(path: &str) -> Map {
                     let map_borrow = &mut map;
 
                     if part_no.len() > 0 {
-                        map_borrow.numbers.push(Part{ 
-                            number: part_no.parse::<usize>().unwrap(), 
-                            len: part_no.len(),
-                            x: x_coord as i64, 
-                            y: y_coord as i64 - 1 
-                        });
+                        let key = x_coord as i64;
 
+                        map_borrow.parts.entry(key)
+                                        .and_modify(|v| {
+                                            v.push(Part { 
+                                                number: part_no.parse::<usize>().unwrap(), 
+                                                len: part_no.len(), 
+                                                x: x_coord as i64, 
+                                                y: y_coord as i64 - 1, 
+                                            });
+                                        }).or_insert(vec![Part{
+                                            number: part_no.parse::<usize>().unwrap(), 
+                                                len: part_no.len(), 
+                                                x: x_coord as i64, 
+                                                y: y_coord as i64 - 1,
+                                        }]);
                         part_no.clear();
                     }
                 }
@@ -45,23 +54,14 @@ fn parse_file(path: &str) -> Map {
                 {
                     let map_borrow = &mut map;
 
-                    if c != '.' {
+                    if c == '*' {
                         // save the symbol
                         let key = x_coord as i64;
-
-                        map_borrow.symbols.entry(key)
-                                          .and_modify(|v| {
-                                            v.push(Symbol{
-                                                symbol: c,
-                                                x: x_coord as i64,
-                                                y: y_coord as i64,
-                                            });
-                                        })
-                                          .or_insert(vec![Symbol{
-                                            symbol: c,
-                                            x: x_coord as i64,
-                                            y: y_coord as i64,
-                                        }]);
+                        map_borrow.gears.push(Symbol{
+                            symbol: c,
+                            x: x_coord as i64,
+                            y: y_coord as i64,
+                        });
                     }
                 }
             }
@@ -72,13 +72,22 @@ fn parse_file(path: &str) -> Map {
             let map_borrow = &mut map;
 
             if part_no.len() > 0 {
-                map_borrow.numbers.push(Part{ 
-                    number: part_no.parse::<usize>().unwrap(), 
-                    len: part_no.len(),
-                    x: x_coord as i64, 
-                    y: last_y_coord as i64 - 1 
-                });
+                let key = x_coord as i64;
 
+                map_borrow.parts.entry(key)
+                                .and_modify(|v| {
+                                    v.push(Part { 
+                                        number: part_no.parse::<usize>().unwrap(), 
+                                        len: part_no.len(), 
+                                        x: x_coord as i64, 
+                                        y: last_y_coord as i64 - 1, 
+                                    });
+                                }).or_insert(vec![Part{
+                                    number: part_no.parse::<usize>().unwrap(), 
+                                        len: part_no.len(), 
+                                        x: x_coord as i64, 
+                                        y: last_y_coord as i64 - 1,
+                                }]);
                 part_no.clear();
             }
         }
@@ -95,7 +104,7 @@ fn parse_file(path: &str) -> Map {
 }
 
 fn main() {
-    let map = parse_file("input.txt");
+    let map = parse_file("test_input.txt");
     let sum = map.compute_sum();
 
     println!("Result: {}", sum);
@@ -106,5 +115,5 @@ fn main() {
 fn given_case() {
     let map = parse_file("test_input.txt");
     let sum = map.compute_sum();
-    assert_eq!(sum, 4361);
+    assert_eq!(sum, 467835);
 }

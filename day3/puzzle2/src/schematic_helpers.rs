@@ -36,49 +36,61 @@ impl Map {
     pub fn compute_sum(self: &Map) -> usize {
         let mut collected_nums: Vec<usize> = Vec::new();
 
-        // for each element in the numbers, we first look up it's 
-        // x coordinate and then generate it's adjacent row
-        // edge cases are for the ends of the input, meaning 1 and n-1
-        // cannot be decremented or incremented respectively
-        for part in self.numbers.iter() {
-            let coords = AdjCoords::from_part(&part, self.width, self.height);
+        for gear in self.gears.iter() {
+            let coords = AdjCoords::from_gear(&gear, self.width, self.height);
+            let mut ratios: Vec<usize> = Vec::new();
 
             // search for the following in this order:
             //  1) current row (x_coord) and y_beh, y_forward
             //  2) backward row (if != -1)
             //  3) forward row (if != -1)
-            if self.symbols.contains_key(&part.x) {
-                for symbol in self.symbols.get(&part.x).unwrap().iter() {
-                    // if the symbol is in the current row, it is only in
-                    // one of two possible places
-                    //  1) next to the y_coord (y_coord forward)
-                    //  2) a in front of the number, where:
-                    //      symbol.y = part.y - (part.len + 1)
-                    if symbol.y == coords.y_behind || symbol.y == coords.y_forward {
-                        collected_nums.push(part.number);
+            if self.parts.contains_key(&gear.x) {
+                for part in self.parts.get(&gear.x).unwrap().iter() {
+                    if part.y == coords.y_behind {
+                        ratios.push(part.number);
+                    }
+
+                    if part.x == coords.x_behind {
+                        ratios.push(part.number);
                     }
                 }
             }
 
-            if self.symbols.contains_key(&coords.x_behind) {
-                // for this case and 3), it is a little trickier
-                // the symbol could be:
-                //  1) y_forward as above.
-                //  2) between y_behind and y_forward
-                for symbol in self.symbols.get(&coords.x_behind).unwrap().iter() {
-                    if symbol.y >= coords.y_behind && symbol.y <= coords.y_forward {
-                        collected_nums.push(part.number);
+            // subsequent searches are harder, as the gear symbol could
+            // be adjacent to AdjCoords::from_part
+            if self.parts.contains_key(&coords.x_behind) {
+                for part in self.parts.get(&coords.x_behind).unwrap().iter() {
+                    let part_coords = AdjCoords::from_part(part, self.width, self.height);
+
+                    if coords.y_behind >= part_coords.y_behind  && gear.y <= part_coords.y_forward {
+                        if ratios.len() < 2 {
+                            ratios.push(part.number);
+                        }
+                        
                     }
                 }   
             }
 
-            if self.symbols.contains_key(&coords.x_forward) {
-                for symbol in self.symbols.get(&coords.x_forward).unwrap().iter() {
-                    if symbol.y >= coords.y_behind && symbol.y <= coords.y_forward {
-                        collected_nums.push(part.number);
+            if self.parts.contains_key(&coords.x_forward) {
+                for part in self.parts.get(&coords.x_forward).unwrap().iter() {
+                    let part_coords = AdjCoords::from_part(part, self.width, self.height);
+
+                    if coords.y_behind >= part_coords.y_behind && gear.y <= part_coords.y_forward {
+                        if ratios.len() < 2 {
+                            ratios.push(part.number);
+                        }
                     }
                 }   
             }
+
+            // multiply everything in the vec, add the result to 
+            // collected nums, then clear
+            println!("DEBUG: rations: {:?}", ratios);
+            if ratios.len() > 2 {
+                collected_nums.push(ratios.iter().fold(1, |acc, num| { acc * num}));
+            }
+            
+            ratios.clear();
         }
 
         collected_nums.iter().fold(0, |acc, num| { acc + num })
@@ -94,7 +106,45 @@ pub struct AdjCoords {
 }
 
 impl AdjCoords {
-    pub fn from_part(part: &Symbol, max_width: i64, max_height: i64) -> AdjCoords {
+    pub fn from_gear(symbol: &Symbol, max_width: i64, max_height: i64) -> AdjCoords {
+        let mut x_beh: i64;
+        let mut x_for: i64;
+
+        x_beh = symbol.x - 1;
+        x_for = symbol.x + 1;
+
+        if x_beh < 0 {
+            x_beh = -1;
+        }
+
+        if x_for > max_height {
+            x_for = -1;
+        }
+
+        let mut y_beh: i64;
+        let mut y_for: i64;
+
+        y_beh = symbol.y - 1;
+        y_for = symbol.y + 1;
+
+        if y_beh < 0 {
+            y_beh = 0;
+        }
+
+
+        if y_for > max_width {
+            y_for = -1;
+        }
+
+        AdjCoords { 
+            x_behind: x_beh, 
+            y_behind: y_beh, 
+            x_forward: x_for, 
+            y_forward: y_for 
+        }
+    }
+
+    pub fn from_part(part: &Part, max_width: i64, max_height: i64) -> AdjCoords {
         let mut x_beh: i64;
         let mut x_for: i64;
 
