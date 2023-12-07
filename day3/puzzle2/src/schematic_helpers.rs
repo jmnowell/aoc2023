@@ -1,4 +1,4 @@
-use std::collections::{HashMap};
+use std::collections::{HashMap, HashSet};
 
 #[derive(Debug)]
 pub struct Part {
@@ -38,9 +38,7 @@ impl Map {
 
         for gear in self.gears.iter() {
             let coords = AdjCoords::from_gear(&gear, self.width, self.height);
-            let mut ratios: Vec<usize> = Vec::new();
-
-            println!("DEBUG: symbol (x, y): {}, {} (x_b, x_f, y_b, y_f): {}, {}, {}, {}", gear.x, gear.y, coords.x_behind, coords.x_forward, coords.y_behind, coords.y_forward);
+            let mut ratios: HashSet<usize> = HashSet::new();
 
             // search for the following in this order:
             //  1) current row (x_coord) and y_beh, y_forward
@@ -48,12 +46,10 @@ impl Map {
             //  3) forward row (if != -1)
             if self.parts.contains_key(&gear.x) {
                 for part in self.parts.get(&gear.x).unwrap().iter() {
-                    if part.y == coords.y_behind {
-                        ratios.push(part.number);
-                    }
-
-                    if part.x == coords.x_behind {
-                        ratios.push(part.number);
+                    let part_coords = AdjCoords::from_part(part, self.width, self.height);
+                
+                    if gear.y == part_coords.y_behind || gear.y == part_coords.y_forward  {
+                        ratios.insert(part.number);
                     }
                 }
             }
@@ -63,11 +59,9 @@ impl Map {
             if self.parts.contains_key(&coords.x_behind) {
                 for part in self.parts.get(&coords.x_behind).unwrap().iter() {
                     let part_coords = AdjCoords::from_part(part, self.width, self.height);
-
-                    println!("DEBUG: part no: {}, (x, y): {}, {}, (x_b, x_f, y_b, y_f): {}, {}, {}, {}", part.number, part.x, part.y, part_coords.x_behind, part_coords.x_forward, part_coords.y_behind, part_coords.y_forward);
                     
-                    if coords.y_behind >= part_coords.y_behind  && gear.y <= part_coords.y_forward {
-                        ratios.push(part.number);
+                    if gear.y >= part_coords.y_behind && gear.y <= part_coords.y_forward {
+                        ratios.insert(part.number);
                     }
                 }   
             }
@@ -76,16 +70,13 @@ impl Map {
                 for part in self.parts.get(&coords.x_forward).unwrap().iter() {
                     let part_coords = AdjCoords::from_part(part, self.width, self.height);
 
-                    println!("DEBUG: part no: {}, (x, y): {}, {}, (x_b, x_f, y_b, y_f): {}, {}, {}, {}", part.number, part.x, part.y, part_coords.x_behind, part_coords.x_forward, part_coords.y_behind, part_coords.y_forward);
-
-                    if coords.y_behind >= part_coords.y_behind && gear.y <= part_coords.y_forward {
-                        ratios.push(part.number);
+                    if gear.y >= part_coords.y_behind && gear.y <= part_coords.y_forward {
+                        ratios.insert(part.number);
                     }
                 }   
             }
-
             
-            if ratios.len() > 2 {
+            if ratios.len() >= 2 {
                 collected_nums.push(ratios.iter().fold(1, |acc, num| { acc * num}));
             }
             

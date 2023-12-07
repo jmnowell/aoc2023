@@ -1,7 +1,0 @@
-DEBUG: part_coords: AdjCoords { x_behind: -1, y_behind: 0, x_forward: 1, y_forward: 3 }, coords: AdjCoords { x_behind: 0, y_behind: 2, x_forward: 2, y_forward: 4 }
-DEBUG: part_coords: AdjCoords { x_behind: -1, y_behind: 4, x_forward: 1, y_forward: 8 }, coords: AdjCoords { x_behind: 0, y_behind: 2, x_forward: 2, y_forward: 4 }
-DEBUG: rations: [114, 633]
-DEBUG: rations: [617, 58]
-DEBUG: part_coords: AdjCoords { x_behind: 6, y_behind: 5, x_forward: 8, y_forward: 9 }, coords: AdjCoords { x_behind: 7, y_behind: 4, x_forward: 9, y_forward: 6 }
-DEBUG: rations: [755, 598]
-Result: 559438

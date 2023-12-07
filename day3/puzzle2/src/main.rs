@@ -104,7 +104,7 @@ fn parse_file(path: &str) -> Map {
 }
 
 fn main() {
-    let map = parse_file("test_input.txt");
+    let map = parse_file("input.txt");
     let sum = map.compute_sum();
 
     println!("Result: {}", sum);
@@ -116,4 +116,11 @@ fn given_case() {
     let map = parse_file("test_input.txt");
     let sum = map.compute_sum();
     assert_eq!(sum, 467835);
+}
+
+#[test]
+fn final_result() {
+    let map = parse_file("input.txt");
+    let sum = map.compute_sum();
+    assert_eq!(sum, 82301120);
 }
