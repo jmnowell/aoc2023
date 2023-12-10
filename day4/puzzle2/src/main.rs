@@ -17,16 +17,18 @@ fn main() {
 
     for ln in lines {
         match ScratchCard::new(&ln) {
-            Some(val) => cards.push(val),
+            Some(val) => {
+                cards.push(val);
+            },
             None => println!("Did not find a card value"),
         }
     }
 
-    let mut sum: usize = 0;
-
-    for c in cards {
-        sum = sum + c.point_value();
-    }
+    // create the Games
+    let mut games = ScratchGames::new();
+    games.insert_games(&mut cards);
+    games.find_copies();
+    let sum = games.copied_count() + games.original_count();
 
     println!("Result: {}", sum);
 }
@@ -39,16 +41,40 @@ fn given_case() {
 
     for ln in lines {
         match ScratchCard::new(&ln) {
-            Some(val) => cards.push(val),
+            Some(val) => {
+                cards.push(val);
+            },
             None => println!("Did not find a card value."),
         }
     }
 
-    let mut sum: usize = 0;
+    let mut games = ScratchGames::new();
+    games.insert_games(&mut cards);
+    games.find_copies();
+    let sum = games.copied_count() + games.original_count();
 
-    for c in cards {
-        sum = sum + c.point_value();
+    assert_eq!(sum, 30);
+}
+
+#[test]
+fn actual_result() {
+    let lines = read_file("input.txt");
+    let mut cards: Vec<ScratchCard> = Vec::new();
+
+    for ln in lines {
+        match ScratchCard::new(&ln) {
+            Some(val) => {
+                cards.push(val);
+            },
+            None => println!("Did not find a card value"),
+        }
     }
 
-    assert_eq!(sum, 13);
+    // create the Games
+    let mut games = ScratchGames::new();
+    games.insert_games(&mut cards);
+    games.find_copies();
+    let sum = games.copied_count() + games.original_count();
+
+    assert_eq!(sum, 13261850);
 }

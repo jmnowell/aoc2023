@@ -1,4 +1,5 @@
-use std::collections::HashSet;
+use std::{collections::HashSet, ops::Index, borrow::BorrowMut};
+
 use regex::Regex;
 
 #[derive(Debug)]
@@ -51,7 +52,7 @@ impl ScratchCard {
         })
     }
 
-    pub fn point_value(self) -> usize {
+    pub fn point_value(&self) -> usize {
         let count = self.winning_numbers.intersection(&self.scratched_numbers).count();
 
         if count > 1 {
@@ -62,4 +63,98 @@ impl ScratchCard {
 
         count
     }
+
+    pub fn next_cards(&self) -> Option<Vec<usize>> {
+        let count = self.winning_numbers.intersection(&self.scratched_numbers).count();
+
+        if count > 1 {
+            let mut next_cards: Vec<usize> = Vec::new();
+
+            for i in 0..count {
+                next_cards.push(self.id + (i+1));
+                
+            }
+
+            return Some(next_cards);
+        } else if count == 1 {
+            return Some(vec![self.id + 1]);
+        }
+
+        None
+    }
+}
+
+#[derive(Debug)]
+pub struct ScratchGames {
+    games: Vec<ScratchCard>,
+    copied_cards: Vec<usize>,
+}
+
+impl ScratchGames {
+    pub fn new() -> ScratchGames {
+        ScratchGames{
+            games: Vec::new(),
+            copied_cards: Vec::new()
+        }
+    }
+
+    pub fn insert_games(&mut self, games: &mut Vec<ScratchCard>) {
+        for _ in 0..games.len() {
+            self.copied_cards.push(0);
+        }
+
+        self.games.append(games);
+    }
+
+    pub fn copied_count(&self) -> usize {
+        self.copied_cards.iter()
+                         .fold(0, |acc, num| acc + num)
+    }
+
+    pub fn original_count(&self) -> usize {
+        self.games.len()
+    }
+
+    pub fn find_copies(&mut self) {
+        for g in self.games.iter() {
+            let mut next: Vec<usize> = Vec::new();
+
+            // preload the next stack with all
+            // the next cards from the game
+            match g.next_cards() {
+                Some(val) => {
+                    for c in val {
+                        next.push(c);
+                    }
+                },
+                None => continue,
+            }
+
+            loop {
+                match next.pop() {
+                    Some(id) => {
+                        // increment it's copied cards bucket
+                        let target_id = id - 1;
+                        self.copied_cards[target_id] += 1;
+
+                        // fetch the next cards for this id
+                        // and push it onto the stack
+                        // if None - continue with this loop
+                        match self.games.index(target_id).next_cards() {
+                            Some(val) => {
+                                for c in val {
+                                    next.push(c);
+                                }
+                            }, 
+                            None => { continue; }
+                        }
+
+                    },
+                    None => { break; }
+                }
+            }
+        }
+    }
+
+
 }
